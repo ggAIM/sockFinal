@@ -6,7 +6,7 @@ sel = selectors.DefaultSelector()
 
 def accept_wrapper(sock, ind):
     conn, addr = sock.accept()
-    name = f"Client_{ind+1}"
+    name = f"[Client-{ind+1}]"
     print(f"Accepted connection from {name} : {addr}")
     conn.setblocking(False)
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
@@ -16,7 +16,7 @@ def accept_wrapper(sock, ind):
     sel.register(conn, events, data=data)
     return 1
 
-def service_connection():
+def service_connection(key, mask):
     pass
 
 host = "127.0.0.1"
@@ -30,19 +30,32 @@ sel.register(lsock, selectors.EVENT_READ, data=None)
 
 num_clients = 2
 roll_T = "0421312015"
-num_blocks = 2**10
+num_blocks = 5
 
 
 try:
     i = 0
     while i<num_clients:
+        # print(sel.get_map())
         events = sel.select()
+        # print(i)
         for key, mask in events:
+            # print(key)
             if key.data is None:
                 ret_val = accept_wrapper(key.fileobj, i)
                 i += ret_val
+        # print(sel.get_map())
     print(f"{num_clients} clients have connected. Starting operation...")
 
+    recv_blocks = 0
+    sent_blocks = 0
+    client_count = 0
+    while recv_blocks < num_blocks:
+        events = sel.select()
+        for key, mask in events:
+            # print(key)
+            ret_val = service_connection(key, mask)
+        recv_blocks += 1
 
 except KeyboardInterrupt:
     print("Keyboard interrupt detected")
