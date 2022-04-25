@@ -17,7 +17,19 @@ def accept_wrapper(sock, ind):
     return 1
 
 def service_connection(key, mask):
-    pass
+    sock = key.fileobj
+    data = key.data
+    # print(data)
+    if mask & selectors.EVENT_READ:
+        recv_data = sock.recv(35)
+        # print(recv_data)
+        if recv_data[:3] == b'REQ':
+            print("yes")
+
+        # if not recv_data:
+        #     print(f"Disconnecting {data.name}")
+        #     sel.unregister(sock)
+        #     sock.close()
 
 host = "127.0.0.1"
 port = 54321
@@ -52,10 +64,10 @@ try:
     client_count = 0
     while recv_blocks < num_blocks:
         events = sel.select()
+        # print(events)
         for key, mask in events:
             # print(key)
             ret_val = service_connection(key, mask)
-        recv_blocks += 1
 
 except KeyboardInterrupt:
     print("Keyboard interrupt detected")
