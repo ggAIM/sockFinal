@@ -4,8 +4,9 @@ import socket
 host = "127.0.0.1"
 port = 54321
 server_addr = (host, port)
-key_space = 32
+key_space = 20
 # key_space = 32
+# loop_counter = 0
 block_size = 2**key_space
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -26,12 +27,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     match_string_S = "00" + roll_T[-3:]
 
     while True:
-        print("New loop")
+        # print(loop_counter)
+        # loop_counter += 1
         start_val = key_block_num * block_size 
         end_val = (key_block_num + 1) * block_size
+        # print(start_val, end_val)
         for nonce in range(start_val, end_val):
             V = roll_T + str(nonce).zfill(key_space)
             M = md5(V.encode()).hexdigest()
+            # print("Searching ... ")
             if M[:5] == match_string_S:
                 print(M)
                 send_data = ("SCS" + M).encode()
@@ -40,11 +44,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         print("Sending NXT")
         sock.sendall(b'NXT')
         recv_data = sock.recv(4)
-        recv_data = int(recv_data)
         print(recv_data)
-        if not recv_data:
-            print("No data received.")
+        # if not recv_data:
+        if recv_data == b"END":
+            # print("No data received.")
+            print("END packet received. Ending.")
             break
-        key_block_num = recv_data
+        # recv_data = int(recv_data)
+        key_block_num = int(recv_data)
 
 print("Operation ended.")
