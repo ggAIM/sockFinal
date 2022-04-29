@@ -44,7 +44,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         print("Sending NXT")
         sock.sendall(b'NXT')
         recv_data = sock.recv(4)
-        print(recv_data)
+        # print(recv_data)
         # if not recv_data:
         if recv_data == b"END":
             # print("No data received.")

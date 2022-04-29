@@ -1,5 +1,6 @@
 import socket
 import selectors
+from time import time
 import types
 
 sel = selectors.DefaultSelector()
@@ -16,7 +17,7 @@ def accept_wrapper(sock, ind):
     sel.register(conn, events, data=data)
     return 1
 
-def service_connection(key, mask, sent_blocks):
+def service_connection(key, mask, sent_blocks, file):
     sock = key.fileobj
     data = key.data
     # print(data)
@@ -31,8 +32,10 @@ def service_connection(key, mask, sent_blocks):
             return 1
 
         if recv_data[:3] == b'SCS':
-            write_data = data.name + recv_data[3:].decode()
-            print(write_data)
+            write_data = str(key_counter) + ". " + data.name + recv_data[3:].decode() + "\n"
+            file.write(write_data)
+            return 4
+            # print(write_data)
         
         if recv_data[:3] == b'NXT':
             if sent_blocks < num_blocks:
@@ -49,20 +52,13 @@ def service_connection(key, mask, sent_blocks):
 
 host = "127.0.0.1"
 port = 54321
-# lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# lsock.bind((host, port))
-# lsock.listen()
-# print("Server started...")
-# lsock.setblocking(False)
-# sel.register(lsock, selectors.EVENT_READ, data=None)
-
 num_clients = 2
-roll_T = b"0421312015"
 num_blocks = 5
-
+roll_T = b"0421312015"
 
 try:
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     lsock.bind((host, port))
     lsock.listen()
     print("Server started...")
@@ -83,13 +79,19 @@ try:
 
     recv_blocks = 0
     sent_blocks = 0
+    key_counter = 1
+    file = open("/media/yasirl/Data/Programming/MICT/ICT6544_DS_HAM/sockFinal/results.txt", "a")
+    write_data = "Number of Clients = " + str(client_count) + "\n"
+    file.write(write_data)
+    start_time = time()
+
     while recv_blocks < num_blocks:
         # print(sent_blocks, recv_blocks)
         events = sel.select()
         # print(events)
         for key, mask in events:
             # print(key)
-            ret_val = service_connection(key, mask, sent_blocks)
+            ret_val = service_connection(key, mask, sent_blocks, file)
             if ret_val == 1:
                 sent_blocks += 1
             elif ret_val == 2:
@@ -97,12 +99,19 @@ try:
                 recv_blocks += 1
             elif ret_val == 3:
                 recv_blocks += 1
+            elif ret_val == 4:
+                key_counter += 1
         # print(sent_blocks, recv_blocks)
+    end_time = time()
+    run_time = end_time - start_time
+    file.write("Time = " + str(run_time) + "\n")
     print("Operation complete.")
-    sel.close()
-    lsock.close()
+    # sel.close()
+    # lsock.close()
 
 except KeyboardInterrupt:
     print("Keyboard interrupt detected")
 finally:
+    file.close()
     sel.close()
+    lsock.close()

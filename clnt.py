@@ -21,22 +21,29 @@
 # print(tfun(a))
 # print(a)
 
-from hashlib import md5
+# from hashlib import md5
 
 
-roll_T = "0421312015"
-# match_string_S = concat("00", roll_T[-3:])
-match_string_S = "00" + roll_T[-3:]
-# match_string_S = "00" + roll_T(-3:)
-print(match_string_S)
-hsh = md5(match_string_S.encode()).hexdigest()
-print(hsh[:5])
-print(hsh)
+# roll_T = "0421312015"
+# # match_string_S = concat("00", roll_T[-3:])
+# match_string_S = "00" + roll_T[-3:]
+# # match_string_S = "00" + roll_T(-3:)
+# print(match_string_S)
+# hsh = md5(match_string_S.encode()).hexdigest()
+# print(hsh[:5])
+# print(hsh)
 
-b1 = b"123"
-b2 = int(b1)
-b3 = int(b1.decode())
-print(b2)
-print(b3)
-print(type(b2))
-print(type(b3))
+# b1 = b"123"
+# b2 = int(b1)
+# b3 = int(b1.decode())
+# print(b2)
+# print(b3)
+# print(type(b2))
+# print(type(b3))
+import os
+
+f = open("/media/yasirl/Data/Programming/MICT/ICT6544_DS_HAM/sockFinal/tst.txt", "w")
+f.write("tis test")
+f.close()
+
+os.remove("/media/yasirl/Data/Programming/MICT/ICT6544_DS_HAM/sockFinal/tst.txt")
