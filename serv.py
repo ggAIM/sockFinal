@@ -16,7 +16,7 @@ def accept_wrapper(sock, ind):
     sel.register(conn, events, data=data)
     return 1
 
-def service_connection(key, mask):
+def service_connection(key, mask, sent_blocks):
     sock = key.fileobj
     data = key.data
     # print(data)
@@ -24,7 +24,22 @@ def service_connection(key, mask):
         recv_data = sock.recv(35)
         # print(recv_data)
         if recv_data[:3] == b'REQ':
-            print("yes")
+            # print(recv_data[3:])
+            send_data = roll_T + str(sent_blocks).zfill(4).encode()
+            sock.sendall(send_data)
+            print("Data sent for REQ")
+            return 1
+
+        if recv_data[:3] == b'SCS':
+            write_data = data.name + recv_data[3:].decode()
+            print(write_data)
+        
+        if recv_data[:3] == b'NXT':
+            if sent_blocks <= num_blocks:
+                send_data = str(sent_blocks).zfill(4).encode()
+                sock.sendall(send_data)
+                print("Data sent for NXT")
+                return 2
 
         # if not recv_data:
         #     print(f"Disconnecting {data.name}")
@@ -41,7 +56,7 @@ lsock.setblocking(False)
 sel.register(lsock, selectors.EVENT_READ, data=None)
 
 num_clients = 2
-roll_T = "0421312015"
+roll_T = b"0421312015"
 num_blocks = 5
 
 
@@ -67,7 +82,12 @@ try:
         # print(events)
         for key, mask in events:
             # print(key)
-            ret_val = service_connection(key, mask)
+            ret_val = service_connection(key, mask, sent_blocks)
+            if ret_val == 1:
+                sent_blocks += 1
+            elif ret_val == 2:
+                sent_blocks += 1
+                recv_blocks += 1
 
 except KeyboardInterrupt:
     print("Keyboard interrupt detected")
