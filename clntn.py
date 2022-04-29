@@ -5,9 +5,10 @@ import numpy as np
 host = "127.0.0.1"
 port = 54321
 server_addr = (host, port)
-key_space = 24
-# key_space = 32
-block_size = 2**key_space
+total_key_bits = 32
+block_addr_bits = 10
+block_key_bits = total_key_bits - block_addr_bits
+block_size = 2**block_key_bits
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect_ex(server_addr)

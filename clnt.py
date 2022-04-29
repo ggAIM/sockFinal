@@ -1,6 +1,5 @@
 from hashlib import md5
 import numpy as np
-import cffi
 
 key_block_num = 0
 key_space = 20

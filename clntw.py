@@ -5,9 +5,7 @@ host = "127.0.0.1"
 port = 54321
 server_addr = (host, port)
 total_key_bits = 32
-key_space = 2**total_key_bits
 block_addr_bits = 10
-# block_num = 2**block_addr_bits
 block_key_bits = total_key_bits - block_addr_bits
 block_size = 2**block_key_bits
 
