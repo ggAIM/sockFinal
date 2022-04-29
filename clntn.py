@@ -1,15 +1,13 @@
 from hashlib import md5
 import socket
+import numpy as np
 
 host = "127.0.0.1"
 port = 54321
 server_addr = (host, port)
-total_key_bits = 32
-key_space = 2**total_key_bits
-block_addr_bits = 10
-# block_num = 2**block_addr_bits
-block_key_bits = total_key_bits - block_addr_bits
-block_size = 2**block_key_bits
+key_space = 24
+# key_space = 32
+block_size = 2**key_space
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect_ex(server_addr)
@@ -25,8 +23,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     while True:
         start_val = key_block_num * block_size 
         end_val = (key_block_num + 1) * block_size
-        for nonce in range(start_val, end_val):
-            V = roll_T + str(nonce).zfill(total_key_bits)
+        nonce_array = np.arange(start_val, end_val)
+
+        for nonce in np.arange(start_val, end_val):
+            V = roll_T + str(nonce).zfill(key_space)
             M = md5(V.encode()).hexdigest()
             if M[:5] == match_string_S:
                 print(M)

@@ -12,20 +12,15 @@ def accept_wrapper(sock, ind):
     conn.setblocking(False)
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
     data = types.SimpleNamespace(name=name, addr=addr)
-    # print(name, data)
-    # conn.close()
     sel.register(conn, events, data=data)
     return 1
 
 def service_connection(key, mask, sent_blocks, file):
     sock = key.fileobj
     data = key.data
-    # print(data)
     if mask & selectors.EVENT_READ:
         recv_data = sock.recv(35)
-        # print(recv_data)
         if recv_data[:3] == b'REQ':
-            # print(recv_data[3:])
             send_data = roll_T + str(sent_blocks).zfill(4).encode()
             sock.sendall(send_data)
             print(f"Data sent for REQ to {data.name}")
@@ -35,7 +30,6 @@ def service_connection(key, mask, sent_blocks, file):
             write_data = str(key_counter) + ". " + data.name + recv_data[3:].decode() + "\n"
             file.write(write_data)
             return 4
-            # print(write_data)
         
         if recv_data[:3] == b'NXT':
             if sent_blocks < num_blocks:
@@ -67,14 +61,11 @@ try:
 
     client_count = 0
     while client_count < num_clients:
-        # print(sel.get_map())
         events = sel.select()
         for key, mask in events:
-            # print(key)
             if key.data is None:
                 ret_val = accept_wrapper(key.fileobj, client_count)
                 client_count += ret_val
-        # print(sel.get_map())
     print(f"{num_clients} clients have connected. Starting operation...")
 
     recv_blocks = 0
@@ -86,11 +77,8 @@ try:
     start_time = time()
 
     while recv_blocks < num_blocks:
-        # print(sent_blocks, recv_blocks)
         events = sel.select()
-        # print(events)
         for key, mask in events:
-            # print(key)
             ret_val = service_connection(key, mask, sent_blocks, file)
             if ret_val == 1:
                 sent_blocks += 1
@@ -101,13 +89,10 @@ try:
                 recv_blocks += 1
             elif ret_val == 4:
                 key_counter += 1
-        # print(sent_blocks, recv_blocks)
     end_time = time()
     run_time = end_time - start_time
     file.write("Time = " + str(run_time) + "\n")
     print("Operation complete.")
-    # sel.close()
-    # lsock.close()
 
 except KeyboardInterrupt:
     print("Keyboard interrupt detected")

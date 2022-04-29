@@ -1,49 +1,32 @@
-# import socket
-# from time import sleep
+from hashlib import md5
+import numpy as np
+import cffi
 
-# host = "127.0.0.1"
-# port = 54321
-# server_addr = (host, port)
+key_block_num = 0
+key_space = 20
+block_size = 2 ** key_space
+start_val = key_block_num * block_size 
+end_val = (key_block_num + 1) * block_size
+roll_T = "0421312015"
+matchstr = "00015"
+success_resp = b'SCS'
 
-# sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# sock.setblocking(False)
-# sock.connect_ex(server_addr)
+marray = np.arange(start_val, end_val)
+marray = marray.astype(str)
+marray = np.char.zfill(marray, 10)
 
-# sock.close()
+tarray = np.char.add(roll_T, marray)
 
-# def tfun(a):
-#     a += 1
-#     return a
+earray = np.char.encode(tarray)
+vec = lambda t: md5(t).hexdigest()
+trun = np.vectorize(vec)
+harray = trun(earray)
+sharray = harray.astype('U5')
 
-# a = 5
-# print(a)
-
-# print(tfun(a))
-# print(a)
-
-# from hashlib import md5
-
-
-# roll_T = "0421312015"
-# # match_string_S = concat("00", roll_T[-3:])
-# match_string_S = "00" + roll_T[-3:]
-# # match_string_S = "00" + roll_T(-3:)
-# print(match_string_S)
-# hsh = md5(match_string_S.encode()).hexdigest()
-# print(hsh[:5])
-# print(hsh)
-
-# b1 = b"123"
-# b2 = int(b1)
-# b3 = int(b1.decode())
-# print(b2)
-# print(b3)
-# print(type(b2))
-# print(type(b3))
-import os
-
-f = open("/media/yasirl/Data/Programming/MICT/ICT6544_DS_HAM/sockFinal/tst.txt", "w")
-f.write("tis test")
-f.close()
-
-os.remove("/media/yasirl/Data/Programming/MICT/ICT6544_DS_HAM/sockFinal/tst.txt")
+cmarray = np.char.equal(matchstr, sharray)
+# print(cmarray)
+resarray = harray[cmarray]
+resarray = np.char.encode(resarray)
+# print(resarray)
+finarray = np.char.add(success_resp, resarray)
+print(finarray)
